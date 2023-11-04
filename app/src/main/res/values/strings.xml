@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Wallpaper App</string>
+    <string name="heading"></string>
+    <string name="email_hint">Enter your Email ID</string>
+    <string name="password_hint">Enter your password</string>
+    <string name="button_text">Login</string>
+    <string name="title_activity_wallpaper_screen">WallpaperScreen</string>
+</resources>
