@@ -56,7 +56,8 @@ android {
 dependencies {
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
-    implementation ("androidx.navigation:navigation-compose:2.4.0-beta02")
+    implementation ("androidx.navigation:navigation-compose:2.6.0")
+
     implementation("io.coil-kt:coil-compose:1.3.2")
     implementation ("android.arch.lifecycle:extensions:1.1.1")
     implementation("androidx.core:core-ktx:1.9.0")
@@ -67,6 +68,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+
+    val compose_version="1.5.4"
+    implementation ("androidx.compose.material:material:$compose_version")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
