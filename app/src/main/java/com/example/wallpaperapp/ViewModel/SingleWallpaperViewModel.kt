@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.wallpaperapp.Model.WallpaperT
+import com.example.wallpaperapp.Repository.Model.WallpaperT
 import com.example.wallpaperapp.Repository.WallpaperRepository
 import kotlinx.coroutines.launch
 
@@ -18,7 +18,7 @@ class SingleWallpaperViewModel:ViewModel() {
     private val clickEvent = MutableLiveData<String>()
     val clickEventLiveData: LiveData<String> = clickEvent
 
-    var wallpaper:WallpaperT?=null
+    var wallpaper: WallpaperT?=null
      fun wallpaper(wallid: Int?) {
          viewModelScope.launch {
              try {

@@ -1,4 +1,4 @@
-package com.example.wallpaperapp.wallpaperSingleScreen
+package com.example.wallpaperapp.Screens.wallpaperSingleScreen
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -32,7 +32,7 @@ fun Wallpaper_view (viewModel: SingleWallpaperViewModel, wallId: Int?){
         ) {
             Image(
                 painter = painter,
-                contentDescription = wallpaperT.category,
+                contentDescription = "",
                 contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize()
             )
 

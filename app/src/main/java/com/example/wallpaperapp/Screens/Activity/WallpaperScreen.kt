@@ -1,4 +1,4 @@
-package com.example.wallpaperapp.Activity
+package com.example.wallpaperapp.Screens.Activity
 
 import android.os.Bundle
 import android.widget.Toast
@@ -10,7 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.wallpaperapp.R
 import com.example.wallpaperapp.ViewModel.SingleWallpaperViewModel
-import com.example.wallpaperapp.wallpaperSingleScreen.Wallpaper_view
+import com.example.wallpaperapp.Screens.wallpaperSingleScreen.Wallpaper_view
 import android.app.AlertDialog
 import android.app.WallpaperManager
 import android.content.Context
@@ -37,7 +37,7 @@ class WallpaperScreen : ComponentActivity() {
         }
         viewModel.clickEventLiveData.observe(this) {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-            setWallpaperFromURL(it,WallpaperOption.HOME)
+            setWallpaperFromURL(it, WallpaperOption.HOME)
         }
     }
 

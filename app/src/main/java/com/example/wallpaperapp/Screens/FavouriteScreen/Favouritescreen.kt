@@ -1,4 +1,4 @@
-package com.example.wallpaperapp.FavouriteScreen
+package com.example.wallpaperapp.Screens.FavouriteScreen
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
