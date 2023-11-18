@@ -9,9 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.rememberImagePainter
@@ -19,9 +17,10 @@ import com.example.wallpaperapp.R
 import com.example.wallpaperapp.ViewModel.WallpaperGridViewModel
 
 @Composable
-fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,type:Int,catid:Int) {
+fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,type:Int,catid:Int,favSet:HashSet<Int>?) {
     // type =1 main wallpaper
     if(type==1)viewModel.fetchWallpapers()
+    else if(type==3)viewModel.favWallpaper()
     else viewModel.fetchCategoryWallpapers(catid)
 
     val wallpapers = viewModel.wallpapers
@@ -60,7 +59,10 @@ fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,typ
                                 onClick = {
                                     viewModel.clicked(wallpaper.id)
                                 },
-                                0
+                                if (favSet?.contains(wallpaper.id) == true) 1 else 0,
+                                onFavClick = {
+                                  viewModel.favclicked(wallpaper.id,wallpaper.url,it)
+                                }
                             )
                         }
                     }

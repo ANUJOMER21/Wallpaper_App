@@ -35,7 +35,8 @@ fun WallpaperThumnail(
     contentDescription: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit, // Add a click listener as a parameter
-    intialfav:Int
+    intialfav:Int,
+    onFavClick:(Int )->Unit
 
 ) {
     var fav by remember {
@@ -60,6 +61,7 @@ fun WallpaperThumnail(
                 .align(Alignment.BottomEnd)
                 .padding(10.dp)
                 .clickable {
+                    onFavClick(fav)
                     fav = if (fav == 0) 1 else 0 // Toggle the favorite state
 
                 },

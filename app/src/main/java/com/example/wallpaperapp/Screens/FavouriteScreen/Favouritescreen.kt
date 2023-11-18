@@ -1,9 +1,9 @@
 package com.example.wallpaperapp.Screens.FavouriteScreen
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.example.wallpaperapp.Repository.Model.WallpaperT
 
 @Composable
-fun favouritescreen(){
-    Text(text = "favourite")
+fun favouritescreen() {
+
 }
