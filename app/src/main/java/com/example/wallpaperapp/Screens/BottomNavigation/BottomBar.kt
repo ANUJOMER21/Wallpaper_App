@@ -29,7 +29,6 @@ fun BottomBar(navController: NavHostController, state: MutableState<Boolean>, mo
     val screens= listOf(
         BottomNavigationScreens.wallpapers,
         BottomNavigationScreens.category,
-        BottomNavigationScreens.favourite,
         BottomNavigationScreens.profile
     )
     val slideInTransition = remember {

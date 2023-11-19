@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -24,10 +25,11 @@ import coil.ImageLoader
 import coil.imageLoader
 import com.example.wallpaperapp.Repository.Model.WallpaperT
 
+
 import com.example.wallpaperapp.Screens.BottomNavigation.BottomBar
 import com.example.wallpaperapp.Screens.BottomNavigation.BottomNavigationScreens
 import com.example.wallpaperapp.Screens.CategoryRowScreen.categoryGrid
-import com.example.wallpaperapp.Screens.FavouriteScreen.favouritescreen
+
 import com.example.wallpaperapp.Screens.Profilescreen.profilescreen
 import com.example.wallpaperapp.ViewModel.CategoryViewModel
 import com.example.wallpaperapp.ViewModel.WallpaperGridViewModel
@@ -40,12 +42,15 @@ class MainActivity : ComponentActivity() {
     private val WallpaperGridViewModel: WallpaperGridViewModel by viewModels()
     private val CategoryViewModel:CategoryViewModel by viewModels()
 
+
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+
 
         setContent {
 
@@ -78,6 +83,7 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
 
+
         CategoryViewModel.clickEventLiveData.observe(this){
             val intent=Intent(this@MainActivity, CategoryWallpaperScreen::class.java).apply {
                 putExtra("catid",it)
@@ -87,35 +93,18 @@ class MainActivity : ComponentActivity() {
 
 
     }
+
     @SuppressLint("CoroutineCreationDuringComposition")
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun NavigationGraph(navController: NavHostController){
-
+        val imageLoader=  remember { ImageLoader.Builder(this@MainActivity).build() }
         NavHost(navController = navController, startDestination = BottomNavigationScreens.wallpapers.route){
-composable(BottomNavigationScreens.wallpapers.route){
-    val imageLoader=  remember { ImageLoader.Builder(this@MainActivity).build() }
-
-    val set:HashSet<Int> = HashSet()
-    WallpaperGridViewModel.fav_wallpapers.observe(this@MainActivity){
-        it.forEach{
-            set.add(it.wall_id.toInt())
-        }
-    }
-    WallpaperGrid(viewModel = WallpaperGridViewModel,imageLoader,1,0,set)
-}
+            composable(BottomNavigationScreens.wallpapers.route){
+                WallpaperGrid(viewModel = WallpaperGridViewModel,imageLoader,type=1, catid = 0)
+            }
             composable(BottomNavigationScreens.category.route){
                categoryGrid(viewModel = CategoryViewModel, imageLoader = imageLoader)
-            }
-            composable(BottomNavigationScreens.favourite.route){
-
-                val set:HashSet<Int> = HashSet()
-                WallpaperGridViewModel.fav_wallpapers.observe(this@MainActivity){
-                    it.forEach{
-                        set.add(it.wall_id.toInt())
-                    }
-                }
-               WallpaperGrid(viewModel = WallpaperGridViewModel, imageLoader =imageLoader , type = 3, catid = 0, favSet = set)
             }
             composable(BottomNavigationScreens.profile.route){
                 profilescreen()

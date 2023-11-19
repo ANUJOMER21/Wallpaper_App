@@ -16,7 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import coil.ImageLoader
-import com.example.wallpaperapp.Repository.RoomDb.FavEntity
+
 
 import com.example.wallpaperapp.Screens.Activity.ui.theme.WallpaperAppTheme
 import com.example.wallpaperapp.ViewModel.WallpaperGridViewModel
@@ -38,13 +38,9 @@ class CategoryWallpaperScreen : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
 
                 if (catID != null) {
-                    val set:HashSet<Int> = HashSet()
-                    viewmodel.fav_wallpapers.observe(this){
-                   it.forEach{
-                       set.add(it.wall_id.toInt())
-                   }
-                    }
-                    WallpaperGrid(viewmodel,imageLoader,2,catID,set)
+
+                    WallpaperGrid(viewmodel,imageLoader,2,catID)
+
                 }
         }
     }

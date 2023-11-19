@@ -17,14 +17,12 @@ import com.example.wallpaperapp.R
 import com.example.wallpaperapp.ViewModel.WallpaperGridViewModel
 
 @Composable
-fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,type:Int,catid:Int,favSet:HashSet<Int>?) {
+fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,type:Int,catid:Int) {
     // type =1 main wallpaper
     if(type==1)viewModel.fetchWallpapers()
-    else if(type==3)viewModel.favWallpaper()
     else viewModel.fetchCategoryWallpapers(catid)
 
     val wallpapers = viewModel.wallpapers
-    Log.d("Wallpaper_size","type $type | size ${wallpapers?.size}")
 
     Column {
         if (wallpapers != null) {
@@ -33,7 +31,7 @@ fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,typ
             } else {
                 LazyVerticalGrid(
 
-                    columns = GridCells.Fixed(2),
+                    columns = GridCells.Adaptive(120.dp),
                     contentPadding = PaddingValues(
                         start = 12.dp,
                         top = 16.dp,
@@ -54,14 +52,10 @@ fun WallpaperGrid(viewModel: WallpaperGridViewModel,imageLoader: ImageLoader,typ
 
                             WallpaperThumnail(
                                 painter = painter,
-                                contentDescription = "",
+                                contentDescription =wallpaper.id.toString(),
                                 modifier = Modifier.fillMaxSize(),
                                 onClick = {
                                     viewModel.clicked(wallpaper.id)
-                                },
-                                if (favSet?.contains(wallpaper.id) == true) 1 else 0,
-                                onFavClick = {
-                                  viewModel.favclicked(wallpaper.id,wallpaper.url,it)
                                 }
                             )
                         }

@@ -1,5 +1,6 @@
 package com.example.wallpaperapp.Screens.WallpaperGridScreen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,13 +36,11 @@ fun WallpaperThumnail(
     contentDescription: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit, // Add a click listener as a parameter
-    intialfav:Int,
-    onFavClick:(Int )->Unit
+
 
 ) {
-    var fav by remember {
-        mutableIntStateOf(intialfav)
-    }
+
+
 
     Card(
         modifier = modifier
@@ -57,20 +56,7 @@ fun WallpaperThumnail(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
             )
-            Icon(modifier= Modifier
-                .align(Alignment.BottomEnd)
-                .padding(10.dp)
-                .clickable {
-                    onFavClick(fav)
-                    fav = if (fav == 0) 1 else 0 // Toggle the favorite state
 
-                },
-
-                painter= painterResource(id = if(fav==0) R.drawable.hearts_poker_svgrepo_com else R.drawable.hearts_game_svgrepo_com) ,
-                contentDescription ="",
-                tint= Color.Red
-
-                )
         }
     }
 }
