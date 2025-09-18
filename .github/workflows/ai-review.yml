@@ -7,19 +7,9 @@ on:
 jobs:
   ai-review:
     runs-on: ubuntu-latest
-    
-    permissions:
-      contents: read
-      pull-requests: write
-      actions: write
-      statuses: write        # Fixed: Added missing permission
-      checks: write          # Optional: For check runs
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Get PR files
         id: get-files
@@ -31,176 +21,32 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            
-            const processedFiles = files.map(file => ({
-              filename: file.filename,
-              status: file.status,
-              additions: file.additions,
-              deletions: file.deletions,
-              changes: file.changes,
-              patch: file.patch || '',
-              file_type: file.filename.split('.').pop() || 'unknown',
-              is_binary: file.filename.match(/\.(jpg|jpeg|png|gif|ico|svg|pdf|zip|tar|gz|exe|dll|so|dylib)$/i) ? true : false,
-              size: file.patch ? file.patch.length : 0
-            }));
-            
-            return processedFiles;
+            return files.map(f => f.filename);
 
       - name: Call AI Review API
-        id: ai-review
         run: |
-          # Check if AI_REVIEWER_URL is configured
           if [ -z "${{ secrets.AI_REVIEWER_URL }}" ]; then
-            echo "❌ AI_REVIEWER_URL secret is not configured"
-            echo "Please add it in Settings → Secrets and variables → Actions"
+            echo "❌ AI_REVIEWER_URL secret is not set"
             exit 1
           fi
-          
-          # Create JSON payload with proper escaping
+
           jq -n \
             --arg pr_title "${{ github.event.pull_request.title }}" \
             --arg pr_body "${{ github.event.pull_request.body }}" \
             --argjson pr_number ${{ github.event.pull_request.number }} \
             --arg pr_url "${{ github.event.pull_request.html_url }}" \
             --argjson files '${{ steps.get-files.outputs.result }}' \
-            '{
-              pr_title: $pr_title,
-              pr_body: $pr_body,
-              pr_number: $pr_number,
-              pr_url: $pr_url,
-              files: $files,
-              preferences: {
-                focus_security: true,
-                focus_performance: false,
-                strict_style: false
-              }
-            }' > payload.json
-          
-          # Make API call with better error handling
-          if ! response=$(curl -s -w "%{http_code}" -X POST \
+            '{pr_title: $pr_title, pr_body: $pr_body, pr_number: $pr_number, pr_url: $pr_url, files: $files}' \
+            > payload.json
+
+          curl -s -X POST \
             -H "Content-Type: application/json" \
             -d @payload.json \
-            "${{ secrets.AI_REVIEWER_URL }}/review"); then
-            echo "❌ Failed to make API request"
-            exit 1
-          fi
-          
-          # Extract HTTP status and body
-          http_code="${response: -3}"
-          response_body="${response%???}"
-          
-          if [[ "$http_code" != "200" ]]; then
-            echo "❌ API request failed with status $http_code"
-            echo "Response: $response_body"
-            exit 1
-          fi
-          
-          echo "response=$response_body" >> $GITHUB_OUTPUT
-          
-          # Extract fields safely
-          markdown_report=$(echo "$response_body" | jq -r '.markdown_report // empty')
-          if [ -n "$markdown_report" ]; then
-            echo "markdown_report<<EOF" >> $GITHUB_OUTPUT
-            echo "$markdown_report" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          fi
-          
-          approval=$(echo "$response_body" | jq -r '.review.approval // "COMMENT"')
-          echo "approval=$approval" >> $GITHUB_OUTPUT
-          
-          security_score=$(echo "$response_body" | jq -r '.review.security_score // 0')
-          quality_score=$(echo "$response_body" | jq -r '.review.quality_score // 0')
-          echo "security_score=$security_score" >> $GITHUB_OUTPUT
-          echo "quality_score=$quality_score" >> $GITHUB_OUTPUT
+            "${{ secrets.AI_REVIEWER_URL }}/review" \
+            -o ai-review-response.txt
 
-      - name: Create review comment
-        if: steps.ai-review.outputs.markdown_report != ''
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const markdownReport = `${{ steps.ai-review.outputs.markdown_report }}`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: markdownReport
-            });
-
-      # Fixed: Use Check Run instead of Status Check for better permission compatibility
-      - name: Create Check Run
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const approval = '${{ steps.ai-review.outputs.approval }}';
-            const securityScore = parseInt('${{ steps.ai-review.outputs.security_score }}');
-            const qualityScore = parseInt('${{ steps.ai-review.outputs.quality_score }}');
-            
-            let conclusion = 'success';
-            let title = 'AI review completed successfully';
-            let summary = `Security Score: ${securityScore}/100\nQuality Score: ${qualityScore}/100`;
-            
-            if (approval === 'REQUEST_CHANGES') {
-              conclusion = 'failure';
-              title = 'AI review found issues that need attention';
-            } else if (securityScore < 70 || qualityScore < 70) {
-              conclusion = 'neutral';
-              title = 'AI review suggests improvements';
-            }
-            
-            try {
-              await github.rest.checks.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'AI Code Review',
-                head_sha: context.payload.pull_request.head.sha,
-                status: 'completed',
-                conclusion: conclusion,
-                output: {
-                  title: title,
-                  summary: summary,
-                  text: `Approval: ${approval}\n\nReview completed at: ${new Date().toISOString()}`
-                }
-              });
-            } catch (error) {
-              console.log('Check run creation failed, falling back to comment');
-              console.log(error.message);
-              // Fallback: Just log the result
-              console.log(`AI Review Result: ${title}`);
-            }
-
-      - name: Save review report as artifact
-        if: steps.ai-review.outputs.markdown_report != ''
-        run: |
-          mkdir -p ai-reviews
-          echo '${{ steps.ai-review.outputs.markdown_report }}' > "ai-reviews/pr-${{ github.event.pull_request.number }}-review.md"
-
-      - name: Upload review artifact
-        if: steps.ai-review.outputs.markdown_report != ''
+      - name: Upload response as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ai-review-pr-${{ github.event.pull_request.number }}
-          path: ai-reviews/
-          retention-days: 30
-
-      - name: Handle API errors
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `## ❌ AI Code Review Failed
-            
-              The automated AI code review could not be completed. This may be due to:
-              - Service unavailability
-              - API rate limits
-              - Network issues
-              - Permission issues
-            
-              Please review this PR manually or try triggering the review again.
-            
-              *Generated at: ${new Date().toISOString()}*`
-            });
+          name: ai-review-response
+          path: ai-review-response.txt
